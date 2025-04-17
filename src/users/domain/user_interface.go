@@ -15,11 +15,7 @@ type UserInterface interface {
 
 	GetAll() ([]*userEntity.UserEntity, error)
 
-	GetByRole(role string) ([]*userEntity.UserEntity, error)
-
-	/* 	UpdateUser(user *userEntity.UserEntity) error
-
-	   	DeleteUser(id int32) error */
+	GetByRole(role int32) ([]*userEntity.UserEntity, error)
 
 	ExistsByEmail(email string) (bool, error)
 	ExistsByMatricula(matricula string) (bool, error)

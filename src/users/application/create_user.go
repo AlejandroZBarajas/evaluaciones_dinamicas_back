@@ -14,13 +14,11 @@ func NewCreateUser(repo userDomain.UserInterface) *CreateUser {
 	return &CreateUser{repo: repo}
 }
 
-func (cu *CreateUser) Create(email string, matricula string) error {
+func (cu *CreateUser) Run(email string, matricula string) (*userEntity.UserEntity, error) {
 	user := userEntity.CreateUser(email, matricula)
-
 	err := cu.repo.CreateUser(user)
-
 	if err != nil {
-		return fmt.Errorf("error: %w", err)
+		return nil, fmt.Errorf("error al crear usuario (application): %w", err)
 	}
-	return nil
+	return user, nil
 }

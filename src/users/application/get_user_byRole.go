@@ -13,6 +13,6 @@ func NewGetUsersByRole(repo userDomain.UserInterface) *GetUsersByRole {
 	return &GetUsersByRole{repo: repo}
 }
 
-func (gubr *GetUsersByRole) Run(role string) ([]*userEntity.UserEntity, error) {
+func (gubr *GetUsersByRole) Run(role int32) ([]*userEntity.UserEntity, error) {
 	return gubr.repo.GetByRole(role)
 }

@@ -10,6 +10,10 @@ import (
 
 var DB *sql.DB
 
+func GetDB() *sql.DB {
+	return DB
+}
+
 func Connect() error {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
