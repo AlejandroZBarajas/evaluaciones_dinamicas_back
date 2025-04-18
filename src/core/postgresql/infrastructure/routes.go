@@ -66,6 +66,6 @@ func RegisterQuestionRoutes(mux *http.ServeMux, controller *questionInfrastructu
 	})
 
 	mux.HandleFunc("/questions/id", controller.HandleGetQuestionByID)
-	mux.HandleFunc("/questions/by_exam", controller.HandleGetAllByExam)
-	mux.HandleFunc("/questions/by_category", controller.HandleGetAllByCategory)
+	mux.HandleFunc("/questions/exam", controller.HandleGetAllByExam)
+	mux.HandleFunc("/questions/category", controller.HandleGetAllByCategory)
 }
