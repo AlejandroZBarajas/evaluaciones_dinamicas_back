@@ -1,6 +1,7 @@
 package database
 
 import (
+	questionInfrastructure "evaluaciones/src/question/infrastructure"
 	userInfrastructure "evaluaciones/src/users/infrastructure"
 	"net/http"
 )
@@ -49,13 +50,22 @@ func RegisterUserRoutes(mux *http.ServeMux, controller *userInfrastructure.UserC
 		}
 	})
 
-	/*
-		 	mux.HandleFunc("/users/role/", func(w http.ResponseWriter, r *http.Request) {
-				if r.Method == http.MethodGet {
-					controller.HandleGetUsersByRole(w, r)
-				} else {
-					http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
-				}
-			})
-	*/
+}
+func RegisterQuestionRoutes(mux *http.ServeMux, controller *questionInfrastructure.QuestionController) {
+	mux.HandleFunc("/questions", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			controller.HandleCreateQuestion(w, r)
+		case http.MethodPut:
+			controller.HandleUpdateQuestion(w, r)
+		case http.MethodDelete:
+			controller.HandleDeleteQuestion(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/questions/id", controller.HandleGetQuestionByID)
+	mux.HandleFunc("/questions/by_exam", controller.HandleGetAllByExam)
+	mux.HandleFunc("/questions/by_category", controller.HandleGetAllByCategory)
 }
