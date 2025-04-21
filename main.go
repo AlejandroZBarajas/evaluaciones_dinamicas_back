@@ -13,6 +13,9 @@ import (
 	categoryApplication "evaluaciones/src/categories/application"
 	categoryInfrastructure "evaluaciones/src/categories/infrastructure"
 
+	examApplication "evaluaciones/src/exam/application"
+	examInfrastructure "evaluaciones/src/exam/infrastructure"
+
 	"github.com/joho/godotenv"
 )
 
@@ -60,10 +63,27 @@ func main() {
 		deleteCategory,
 	)
 
+	examRepo := examInfrastructure.NewExamRepository(db)
+
+	createExam := examApplication.NewCreateExam(examRepo)
+	getAllByTeacher := examApplication.NewGetAllExamsByTeacherID(examRepo)
+	getExamByID := examApplication.NewGetExamByID(examRepo)
+	updateExam := examApplication.NewUpdateExam(examRepo)
+	deleteExam := examApplication.NewDeleteExam(examRepo)
+
+	examController := examInfrastructure.NewExamController(
+		createExam,
+		getAllByTeacher,
+		getExamByID,
+		updateExam,
+		deleteExam,
+	)
+
 	mux := http.NewServeMux()
 
 	database.RegisterUserRoutes(mux, userController)
 	database.RegisterCategoryRoutes(mux, categoryController)
+	database.RegisterExamRoutes(mux, examController)
 
 	handlerWithCORS := enableCORS(mux)
 
