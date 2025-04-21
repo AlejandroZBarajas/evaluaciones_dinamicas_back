@@ -6,8 +6,12 @@ import (
 	"os"
 
 	database "evaluaciones/src/core/postgresql/infrastructure"
+
 	userApplication "evaluaciones/src/users/application"
 	userInfrastructure "evaluaciones/src/users/infrastructure"
+
+	categoryApplication "evaluaciones/src/categories/application"
+	categoryInfrastructure "evaluaciones/src/categories/infrastructure"
 
 	"github.com/joho/godotenv"
 )
@@ -40,8 +44,27 @@ func main() {
 		getUsersByRole,
 	)
 
+	categoryRepo := categoryInfrastructure.NewCategoryRepository(db)
+
+	createCategory := categoryApplication.NewCreateCategory(categoryRepo)
+	getCategoryById := categoryApplication.NewGetCategoryByID(categoryRepo)
+	getCategoriesByTeacher := categoryApplication.NewGetAllCategoriesByTeacherID(categoryRepo)
+	updateCategory := categoryApplication.NewUpdateCategory(categoryRepo)
+	deleteCategory := categoryApplication.NewDeleteCategory(categoryRepo)
+
+	categoryController := categoryInfrastructure.NewCategoryController(
+		createCategory,
+		getCategoryById,
+		getCategoriesByTeacher,
+		updateCategory,
+		deleteCategory,
+	)
+
 	mux := http.NewServeMux()
+
 	database.RegisterUserRoutes(mux, userController)
+	database.RegisterCategoryRoutes(mux, categoryController)
+
 	handlerWithCORS := enableCORS(mux)
 
 	port := os.Getenv("PORT")

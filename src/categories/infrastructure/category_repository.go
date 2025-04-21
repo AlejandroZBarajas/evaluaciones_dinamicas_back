@@ -16,8 +16,8 @@ func NewCategoryRepository(db *sql.DB) categoryDomain.CategoryInterface {
 }
 
 func (repo *CategoryRepository) CreateCategory(category *categoryEntity.CategoryEntity) error {
-	query := "INSERT INTO categories (name, teacher_id) VALUES ($1, $2)"
-	_, err := repo.db.Exec(query, category.Name, category.TeacherID)
+	query := "INSERT INTO categories (name, teacher_id) VALUES ($1, $2) RETURNING id"
+	err := repo.db.QueryRow(query, category.Name, category.TeacherID).Scan(&category.ID)
 	return err
 }
 
@@ -60,6 +60,7 @@ func (repo *CategoryRepository) UpdateCategory(categoryID int32, category *categ
 	_, err := repo.db.Exec(query, category.Name, category.TeacherID, categoryID)
 	return err
 }
+
 func (repo *CategoryRepository) DeleteCategory(categoryID int32) error {
 	query := "DELETE FROM categories WHERE id = $1"
 	_, err := repo.db.Exec(query, categoryID)

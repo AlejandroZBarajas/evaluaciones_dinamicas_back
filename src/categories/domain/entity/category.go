@@ -2,7 +2,7 @@ package categoryEntity
 
 type CategoryEntity struct {
 	ID        int32  `json:"id"`
-	Name      string `json:"name`
+	Name      string `json:"name"`
 	TeacherID int32  `json:"teacher_id"`
 }
 

@@ -1,6 +1,7 @@
 package database
 
 import (
+	categoryInfrastructure "evaluaciones/src/categories/infrastructure"
 	questionInfrastructure "evaluaciones/src/question/infrastructure"
 	userInfrastructure "evaluaciones/src/users/infrastructure"
 	"net/http"
@@ -68,4 +69,35 @@ func RegisterQuestionRoutes(mux *http.ServeMux, controller *questionInfrastructu
 	mux.HandleFunc("/questions/id", controller.HandleGetQuestionByID)
 	mux.HandleFunc("/questions/exam", controller.HandleGetAllByExam)
 	mux.HandleFunc("/questions/category", controller.HandleGetAllByCategory)
+}
+
+func RegisterCategoryRoutes(mux *http.ServeMux, controller *categoryInfrastructure.CategoryController) {
+	mux.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			controller.HandleCreateCategory(w, r)
+		case http.MethodPut:
+			controller.HandleUpdateCategory(w, r)
+		case http.MethodDelete:
+			controller.HandleDeleteCategory(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/categories/id", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			controller.HandleGetCategoryByID(w, r)
+		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/categories/teacher", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			controller.HandleGetCategoriesByTeacherID(w, r)
+		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
 }
