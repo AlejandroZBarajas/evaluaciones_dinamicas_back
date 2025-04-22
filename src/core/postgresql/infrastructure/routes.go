@@ -3,6 +3,7 @@ package database
 import (
 	categoryInfrastructure "evaluaciones/src/categories/infrastructure"
 	questionInfrastructure "evaluaciones/src/question/infrastructure"
+	studentExamInfrastructure "evaluaciones/src/student_exam/infrastrcuture"
 	userInfrastructure "evaluaciones/src/users/infrastructure"
 
 	examInfrastructure "evaluaciones/src/exam/infrastructure"
@@ -129,6 +130,40 @@ func RegisterExamRoutes(mux *http.ServeMux, controller *examInfrastructure.ExamC
 		if r.Method == http.MethodPost {
 			controller.HandleGetAllByTeacher(w, r)
 		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+}
+
+func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfrastructure.StudentExamController) {
+	// Crear examen del estudiante
+	mux.HandleFunc("/student-exams", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			controller.HandleCreateStudentExam(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Obtener examen por ID o eliminar
+	mux.HandleFunc("/student-exams/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			controller.HandleGetStudentExamByID(w, r)
+		case http.MethodDelete:
+			controller.HandleDeleteStudentExam(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Obtener todos los exámenes de un examen específico
+	mux.HandleFunc("/student-exams/by-exam", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			controller.HandleGetAllByExamID(w, r)
+		default:
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}
 	})
