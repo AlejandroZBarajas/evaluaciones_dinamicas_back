@@ -67,7 +67,7 @@ func (c *StudentExamController) HandleGetAllByExamID(w http.ResponseWriter, r *h
 }
 
 func (c *StudentExamController) HandleGetStudentExamByID(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/student-exams/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
@@ -98,6 +98,8 @@ func (c *StudentExamController) HandleDeleteStudentExam(w http.ResponseWriter, r
 		http.Error(w, "Error al eliminar el examen del estudiante: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "Eliminado con éxito"})
 
 	w.WriteHeader(http.StatusNoContent)
 }
