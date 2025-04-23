@@ -44,14 +44,17 @@ func (c *ResultsController) HandleCreateResult(w http.ResponseWriter, r *http.Re
 }
 
 func (c *ResultsController) HandleGetAllResultsByExam(w http.ResponseWriter, r *http.Request) {
-	examIDStr := r.URL.Query().Get("exam_id")
-	examID, err := strconv.Atoi(examIDStr)
+	var body struct {
+		ExamID int32 `json:"exam_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		http.Error(w, "ID de examen inválido", http.StatusBadRequest)
+		http.Error(w, "JSON inválido: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	results, err := c.getAllResultsByExam.Run(int32(examID))
+	results, err := c.getAllResultsByExam.Run(body.ExamID)
 	if err != nil {
 		http.Error(w, "Error al obtener los resultados: "+err.Error(), http.StatusInternalServerError)
 		return
