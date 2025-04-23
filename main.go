@@ -22,6 +22,9 @@ import (
 	studentExamApplication "evaluaciones/src/student_exam/application"
 	studentExamInfrastructure "evaluaciones/src/student_exam/infrastrcuture"
 
+	resultsApplication "evaluaciones/src/results/application"
+	resultsInfrastructure "evaluaciones/src/results/infrastructure"
+
 	"github.com/joho/godotenv"
 )
 
@@ -105,7 +108,6 @@ func main() {
 
 	studentExamRepo := studentExamInfrastructure.NewStudentExamRepository(db)
 
-	// Instanciamos los casos de uso de studentExam
 	createStudentExam := studentExamApplication.NewCreateStudentExam(studentExamRepo)
 	getStudentExamByID := studentExamApplication.NewGetStudentExamByID(studentExamRepo)
 	getAllStudentExams := studentExamApplication.NewGetAllByExamID(studentExamRepo)
@@ -118,6 +120,18 @@ func main() {
 		deleteStudentExam,
 	)
 
+	resultRepo := resultsInfrastructure.NewResultsRepository(db)
+
+	createResult := resultsApplication.NewCreateResult(resultRepo)
+	getAllResultsByExam := resultsApplication.NewGetAllResultsByExam(resultRepo)
+	deleteAllResultsByExam := resultsApplication.NewDeleteAllResultsByExam(resultRepo)
+
+	resultController := resultsInfrastructure.NewResultsController(
+		createResult,
+		getAllResultsByExam,
+		deleteAllResultsByExam,
+	)
+
 	mux := http.NewServeMux()
 
 	database.RegisterUserRoutes(mux, userController)
@@ -125,6 +139,7 @@ func main() {
 	database.RegisterExamRoutes(mux, examController)
 	database.RegisterQuestionRoutes(mux, questionController)
 	database.RegisterStudentExamRoutes(mux, studentExamController)
+	database.RegisterResultRoutes(mux, resultController)
 
 	handlerWithCORS := enableCORS(mux)
 

@@ -7,6 +7,7 @@ import (
 	userInfrastructure "evaluaciones/src/users/infrastructure"
 
 	examInfrastructure "evaluaciones/src/exam/infrastructure"
+	resultsInfrastructure "evaluaciones/src/results/infrastructure"
 
 	"net/http"
 )
@@ -136,7 +137,7 @@ func RegisterExamRoutes(mux *http.ServeMux, controller *examInfrastructure.ExamC
 }
 
 func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfrastructure.StudentExamController) {
-	// Crear examen del estudiante
+
 	mux.HandleFunc("/student-exams", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -146,7 +147,6 @@ func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfras
 		}
 	})
 
-	// Obtener examen por ID o eliminar
 	mux.HandleFunc("/student-exams/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -158,12 +158,32 @@ func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfras
 		}
 	})
 
-	// Obtener todos los exámenes de un examen específico
 	mux.HandleFunc("/student-exams/by-exam", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			controller.HandleGetAllByExamID(w, r)
 		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+}
+
+func RegisterResultRoutes(mux *http.ServeMux, controller *resultsInfrastructure.ResultsController) {
+	mux.HandleFunc("/results", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			controller.HandleCreateResult(w, r)
+		case http.MethodDelete:
+			controller.HandleDeleteAllResultsByExam(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/results/by-exam", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			controller.HandleGetAllResultsByExam(w, r)
+		} else {
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}
 	})
