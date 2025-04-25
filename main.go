@@ -112,12 +112,14 @@ func main() {
 	getStudentExamByID := studentExamApplication.NewGetStudentExamByID(studentExamRepo)
 	getAllStudentExams := studentExamApplication.NewGetAllByExamID(studentExamRepo)
 	deleteStudentExam := studentExamApplication.NewDeleteStudentExam(studentExamRepo)
+	evaluateExam := studentExamApplication.NewEvaluateStudentExam(studentExamRepo)
 
 	studentExamController := studentExamInfrastructure.NewStudentExamController(
 		createStudentExam,
 		getAllStudentExams,
 		getStudentExamByID,
 		deleteStudentExam,
+		evaluateExam,
 	)
 
 	resultRepo := resultsInfrastructure.NewResultsRepository(db)

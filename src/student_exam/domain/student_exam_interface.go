@@ -10,4 +10,6 @@ type StudentExamInterface interface {
 	GetStudentExamByID(studentExamID int32) (*studentExamEntity.StudentExamEntity, error)
 
 	DeleteStudentExam(studentExamid int32) error
+
+	EvaluateStudentExam(submission *studentExamEntity.ExamSubmissionInput) (*studentExamEntity.StudentExamResult, error)
 }

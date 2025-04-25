@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	studentExamApplication "evaluaciones/src/student_exam/application"
 	studentExamEntity "evaluaciones/src/student_exam/domain/entity"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 type StudentExamController struct {
-	createStudentExam  *studentExamApplication.CreateStudentExam
-	getAllByExamID     *studentExamApplication.GetAllByExamID
-	getStudentExamByID *studentExamApplication.GetStudentExamByID
-	deleteStudentExam  *studentExamApplication.DeleteStudentExam
+	createStudentExam   *studentExamApplication.CreateStudentExam
+	getAllByExamID      *studentExamApplication.GetAllByExamID
+	getStudentExamByID  *studentExamApplication.GetStudentExamByID
+	deleteStudentExam   *studentExamApplication.DeleteStudentExam
+	evaluateStudentExam *studentExamApplication.EvaluateStudentExam
 }
 
 func NewStudentExamController(
@@ -21,12 +23,14 @@ func NewStudentExamController(
 	getAll *studentExamApplication.GetAllByExamID,
 	getByID *studentExamApplication.GetStudentExamByID,
 	deleteExam *studentExamApplication.DeleteStudentExam,
+	evaluateExam *studentExamApplication.EvaluateStudentExam,
 ) *StudentExamController {
 	return &StudentExamController{
-		createStudentExam:  create,
-		getAllByExamID:     getAll,
-		getStudentExamByID: getByID,
-		deleteStudentExam:  deleteExam,
+		createStudentExam:   create,
+		getAllByExamID:      getAll,
+		getStudentExamByID:  getByID,
+		deleteStudentExam:   deleteExam,
+		evaluateStudentExam: evaluateExam,
 	}
 }
 
@@ -102,4 +106,29 @@ func (c *StudentExamController) HandleDeleteStudentExam(w http.ResponseWriter, r
 	json.NewEncoder(w).Encode(map[string]string{"message": "Eliminado con éxito"})
 
 	w.WriteHeader(http.StatusNoContent)
+}
+func (c *StudentExamController) HandleExamEvaluation(w http.ResponseWriter, r *http.Request) {
+	var submission studentExamEntity.ExamSubmissionInput
+
+	// Decodificar el cuerpo de la solicitud JSON
+	if err := json.NewDecoder(r.Body).Decode(&submission); err != nil {
+		http.Error(w, fmt.Sprintf("Error al leer el cuerpo de la solicitud: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	// Llamar al caso de uso para evaluar las respuestas del examen
+	result, err := c.evaluateStudentExam.Run(&submission)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error al evaluar el examen: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Crear una respuesta JSON con el resultado
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	// Retornar la calificación obtenida en formato JSON
+	if err := json.NewEncoder(w).Encode(result); err != nil {
+		http.Error(w, fmt.Sprintf("Error al escribir la respuesta: %v", err), http.StatusInternalServerError)
+	}
 }
