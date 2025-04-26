@@ -113,6 +113,7 @@ func main() {
 	getAllStudentExams := studentExamApplication.NewGetAllByExamID(studentExamRepo)
 	deleteStudentExam := studentExamApplication.NewDeleteStudentExam(studentExamRepo)
 	evaluateExam := studentExamApplication.NewEvaluateStudentExam(studentExamRepo)
+	generateRandomExam := studentExamApplication.NewGenerateRandomExam(studentExamRepo)
 
 	studentExamController := studentExamInfrastructure.NewStudentExamController(
 		createStudentExam,
@@ -120,6 +121,7 @@ func main() {
 		getStudentExamByID,
 		deleteStudentExam,
 		evaluateExam,
+		generateRandomExam,
 	)
 
 	resultRepo := resultsInfrastructure.NewResultsRepository(db)

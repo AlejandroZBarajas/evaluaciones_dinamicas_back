@@ -16,6 +16,7 @@ type StudentExamController struct {
 	getStudentExamByID  *studentExamApplication.GetStudentExamByID
 	deleteStudentExam   *studentExamApplication.DeleteStudentExam
 	evaluateStudentExam *studentExamApplication.EvaluateStudentExam
+	generateRandomExam  *studentExamApplication.GenerateRandomExam
 }
 
 func NewStudentExamController(
@@ -24,6 +25,7 @@ func NewStudentExamController(
 	getByID *studentExamApplication.GetStudentExamByID,
 	deleteExam *studentExamApplication.DeleteStudentExam,
 	evaluateExam *studentExamApplication.EvaluateStudentExam,
+	generate *studentExamApplication.GenerateRandomExam,
 ) *StudentExamController {
 	return &StudentExamController{
 		createStudentExam:   create,
@@ -31,6 +33,7 @@ func NewStudentExamController(
 		getStudentExamByID:  getByID,
 		deleteStudentExam:   deleteExam,
 		evaluateStudentExam: evaluateExam,
+		generateRandomExam:  generate,
 	}
 }
 
@@ -131,4 +134,25 @@ func (c *StudentExamController) HandleExamEvaluation(w http.ResponseWriter, r *h
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		http.Error(w, fmt.Sprintf("Error al escribir la respuesta: %v", err), http.StatusInternalServerError)
 	}
+}
+func (c *StudentExamController) HandleGenerateRandomExam(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var input studentExamEntity.RandomExamInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Error al decodificar el cuerpo de la solicitud: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	questions, err := c.generateRandomExam.Run(&input)
+	if err != nil {
+		http.Error(w, "Error al generar preguntas aleatorias: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(questions)
 }

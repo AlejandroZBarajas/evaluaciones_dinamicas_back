@@ -176,6 +176,15 @@ func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfras
 		}
 	})
 
+	mux.HandleFunc("/student-exams/random", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			controller.HandleGenerateRandomExam(w, r)
+		default:
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
 }
 
 func RegisterResultRoutes(mux *http.ServeMux, controller *resultsInfrastructure.ResultsController) {

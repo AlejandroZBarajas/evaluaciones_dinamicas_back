@@ -1,6 +1,9 @@
 package studentExamDomain
 
-import studentExamEntity "evaluaciones/src/student_exam/domain/entity"
+import (
+	questionEntity "evaluaciones/src/question/domain/entity"
+	studentExamEntity "evaluaciones/src/student_exam/domain/entity"
+)
 
 type StudentExamInterface interface {
 	CreateStudentExam(studentExam *studentExamEntity.StudentExamEntity) error
@@ -12,4 +15,6 @@ type StudentExamInterface interface {
 	DeleteStudentExam(studentExamid int32) error
 
 	EvaluateStudentExam(submission *studentExamEntity.ExamSubmissionInput) (*studentExamEntity.StudentExamResult, error)
+
+	GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]*questionEntity.QuestionEntity, error)
 }

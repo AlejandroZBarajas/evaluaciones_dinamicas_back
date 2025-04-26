@@ -3,9 +3,10 @@ package studentExamInfrastructure
 import (
 	"database/sql"
 	"encoding/json"
+	questionEntity "evaluaciones/src/question/domain/entity"
 	studentExamEntity "evaluaciones/src/student_exam/domain/entity"
-
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -167,4 +168,54 @@ func (r *StudentExamRepository) EvaluateStudentExam(submission *studentExamEntit
 	}
 
 	return &entity, nil
+}
+
+func (r *StudentExamRepository) GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]*questionEntity.QuestionEntity, error) {
+
+	var totalQuestions int32
+	err := r.db.QueryRow("SELECT total_questions FROM exams WHERE id = ?", input.ExamID).Scan(&totalQuestions)
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener total_questions del examen: %w", err)
+	}
+
+	rows, err := r.db.Query("SELECT id, question_data FROM questions WHERE exam_id = ?", input.ExamID)
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener preguntas del examen: %w", err)
+	}
+	defer rows.Close()
+
+	var allQuestions []*questionEntity.QuestionEntity
+
+	for rows.Next() {
+		var q questionEntity.QuestionEntity
+		var qDataJSON []byte
+
+		if err := rows.Scan(&q.ID, &qDataJSON); err != nil {
+			return nil, fmt.Errorf("error al escanear pregunta: %w", err)
+		}
+
+		var data map[string]interface{}
+		if err := json.Unmarshal(qDataJSON, &data); err != nil {
+			return nil, fmt.Errorf("error al deserializar question_data: %w", err)
+		}
+
+		q.ExamID = input.ExamID
+		q.QuestionData = data
+		allQuestions = append(allQuestions, &q)
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(allQuestions), func(i, j int) {
+		allQuestions[i], allQuestions[j] = allQuestions[j], allQuestions[i]
+	})
+
+	if int32(len(allQuestions)) < totalQuestions {
+		return nil, fmt.Errorf("no hay suficientes preguntas para generar el examen")
+	}
+	selected := allQuestions[:totalQuestions]
+
+	// guardar la selección en una tabla intermedia
+	// la relación entre student_exam_id y las preguntas seleccionadas
+
+	return selected, nil
 }
