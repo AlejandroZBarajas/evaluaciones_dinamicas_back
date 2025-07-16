@@ -46,9 +46,9 @@ func NewUserController(
 
 func (uc *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Email     string `json:"email"`
-		Matricula string `json:"matricula"`
-		Password  string `json:"password"`
+		Email string `json:"email"`
+		/* Matricula string `json:"matricula"` */
+		Password string `json:"password"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -57,8 +57,8 @@ func (uc *UserController) HandleRegister(w http.ResponseWriter, r *http.Request)
 	}
 
 	user := &userEntity.UserEntity{
-		Email:     body.Email,
-		Matricula: body.Matricula,
+		Email: body.Email,
+		/* Matricula: body.Matricula, */
 	}
 
 	err := uc.RegisterUseCase.Run(user, body.Password)
@@ -80,7 +80,7 @@ func (uc *UserController) HandleCreateUser(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	createdUser, err := uc.CreateUseCase.Run(user.Email, user.Matricula)
+	createdUser, err := uc.CreateUseCase.Run(user.Email /* user.Matricula */)
 	if err != nil {
 		log.Printf("❌ Error al crear usuario: %v\n", err)
 		http.Error(w, "Could not create user (infra)", http.StatusInternalServerError)

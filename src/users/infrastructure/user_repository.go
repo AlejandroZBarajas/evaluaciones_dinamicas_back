@@ -30,7 +30,7 @@ func (repo *UserRepository) CreateUser(user *userEntity.UserEntity) error {
 	}
 	hash, _ := auth.HashPassword(user.Password)
 	query := `INSERT INTO users (email, matricula, role_id, password_hash) VALUES ($1, $2, $3, $4) RETURNING id`
-	err := repo.db.QueryRow(query, user.Email, user.Matricula, user.RoleID, hash).Scan(&user.Id)
+	err := repo.db.QueryRow(query, user.Email /* user.Matricula, */, user.RoleID, hash).Scan(&user.Id)
 	if err != nil {
 		return fmt.Errorf("error al insertar usuario: %w", err)
 	}
@@ -42,7 +42,7 @@ func (repo *UserRepository) GetById(id int32) (*userEntity.UserEntity, error) {
 	query := "SELECT id, email, matricula, role_id FROM users WHERE id = $1"
 	row := repo.db.QueryRow(query, id)
 	var user userEntity.UserEntity
-	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID)
+	err := row.Scan(&user.Id, &user.Email /* &user.Matricula, */, &user.RoleID)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (repo *UserRepository) GetByEmail(email string) (*userEntity.UserEntity, er
 	query := "SELECT id, email, matricula, role_id FROM users WHERE email = $1"
 	row := repo.db.QueryRow(query, email)
 	var user userEntity.UserEntity
-	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID, &user.PasswordHash)
+	err := row.Scan(&user.Id, &user.Email /* &user.Matricula, */, &user.RoleID, &user.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (repo *UserRepository) GetByMatricula(matricula string) (*userEntity.UserEn
 	query := "SELECT id, email, matricula, role_id FROM users WHERE matricula = $1"
 	row := repo.db.QueryRow(query, matricula)
 	var user userEntity.UserEntity
-	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID)
+	err := row.Scan(&user.Id, &user.Email /*  &user.Matricula, */, &user.RoleID)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (repo *UserRepository) GetAll() ([]*userEntity.UserEntity, error) {
 	var users []*userEntity.UserEntity
 	for rows.Next() {
 		var user userEntity.UserEntity
-		err := rows.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID)
+		err := rows.Scan(&user.Id, &user.Email /* &user.Matricula, */, &user.RoleID)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func (repo *UserRepository) GetByRole(role int32) ([]*userEntity.UserEntity, err
 	var users []*userEntity.UserEntity
 	for rows.Next() {
 		var user userEntity.UserEntity
-		err := rows.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID)
+		err := rows.Scan(&user.Id, &user.Email /* &user.Matricula, */, &user.RoleID)
 		if err != nil {
 			return nil, err
 		}
@@ -141,11 +141,11 @@ func (repo *UserRepository) ExistsByMatricula(matricula string) (bool, error) {
 	return true, nil
 }
 func (repo *UserRepository) GetCredentialsByEmail(email string) (*userEntity.UserEntity, error) {
-	query := "SELECT id, email, matricula, role_id, password_hash FROM users WHERE email = $1"
+	query := "SELECT id, email, role_id, password_hash FROM users WHERE email = $1"
 	row := repo.db.QueryRow(query, email)
 
 	var user userEntity.UserEntity
-	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID, &user.PasswordHash)
+	err := row.Scan(&user.Id, &user.Email /* &user.Matricula, */, &user.RoleID, &user.PasswordHash)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("usuario no encontrado")
 	}
@@ -157,8 +157,18 @@ func (repo *UserRepository) GetCredentialsByEmail(email string) (*userEntity.Use
 }
 
 func (repo *UserRepository) Register(user *userEntity.UserEntity, plainPassword string) error {
+	var allowedDomains = map[string]struct{}{
+		"ids.upchiapas.edu.mx": {},
+		"upchiapas.edu.mx":     {},
+	}
+
 	parts := strings.Split(user.Email, "@")
-	if len(parts) != 2 || parts[1] != "ids.upchiapas.edu.mx" {
+	if len(parts) != 2 {
+		return fmt.Errorf("correo no válido")
+	}
+
+	domain := parts[1]
+	if _, ok := allowedDomains[domain]; !ok {
 		return fmt.Errorf("correo no válido: solo se aceptan cuentas institucionales")
 	}
 
@@ -175,8 +185,8 @@ func (repo *UserRepository) Register(user *userEntity.UserEntity, plainPassword 
 
 	user.PasswordHash = hash
 
-	query := `INSERT INTO users (email, matricula, role_id, password_hash) VALUES ($1, $2, $3, $4) RETURNING id`
-	err = repo.db.QueryRow(query, user.Email, user.Matricula, user.RoleID, user.PasswordHash).Scan(&user.Id)
+	query := `INSERT INTO users (email,  role_id, password_hash) VALUES ($1, $2, $3) RETURNING id`
+	err = repo.db.QueryRow(query, user.Email, user.RoleID, user.PasswordHash).Scan(&user.Id)
 	if err != nil {
 		return fmt.Errorf("error al insertar usuario: %w", err)
 	}
