@@ -5,6 +5,10 @@ import (
 )
 
 type UserInterface interface {
+	Register(user *userEntity.UserEntity, plainPassword string) error
+
+	GetCredentialsByEmail(email string) (*userEntity.UserEntity, error)
+
 	CreateUser(user *userEntity.UserEntity) error
 
 	GetById(id int32) (*userEntity.UserEntity, error)

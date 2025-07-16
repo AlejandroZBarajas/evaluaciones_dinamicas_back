@@ -24,6 +24,9 @@ func RegisterUserRoutes(mux *http.ServeMux, controller *userInfrastructure.UserC
 		}
 	})
 
+	mux.HandleFunc("/auth/register", controller.HandleRegister)
+	mux.HandleFunc("/auth/login", controller.HandleLogin)
+
 	mux.HandleFunc("/users/id/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			controller.HandleGetUserById(w, r)

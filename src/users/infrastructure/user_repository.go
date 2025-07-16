@@ -2,6 +2,7 @@ package userInfrastructure
 
 import (
 	"database/sql"
+	"evaluaciones/src/core/auth"
 	userEntity "evaluaciones/src/users/domain/entity"
 	"fmt"
 	"regexp"
@@ -27,9 +28,9 @@ func (repo *UserRepository) CreateUser(user *userEntity.UserEntity) error {
 	} else {
 		user.RoleID = 2
 	}
-
-	query := `INSERT INTO users (email, matricula, role_id) VALUES ($1, $2, $3) RETURNING id`
-	err := repo.db.QueryRow(query, user.Email, user.Matricula, user.RoleID).Scan(&user.Id)
+	hash, _ := auth.HashPassword(user.Password)
+	query := `INSERT INTO users (email, matricula, role_id, password_hash) VALUES ($1, $2, $3, $4) RETURNING id`
+	err := repo.db.QueryRow(query, user.Email, user.Matricula, user.RoleID, hash).Scan(&user.Id)
 	if err != nil {
 		return fmt.Errorf("error al insertar usuario: %w", err)
 	}
@@ -52,7 +53,7 @@ func (repo *UserRepository) GetByEmail(email string) (*userEntity.UserEntity, er
 	query := "SELECT id, email, matricula, role_id FROM users WHERE email = $1"
 	row := repo.db.QueryRow(query, email)
 	var user userEntity.UserEntity
-	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID)
+	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID, &user.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -138,4 +139,47 @@ func (repo *UserRepository) ExistsByMatricula(matricula string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+func (repo *UserRepository) GetCredentialsByEmail(email string) (*userEntity.UserEntity, error) {
+	query := "SELECT id, email, matricula, role_id, password_hash FROM users WHERE email = $1"
+	row := repo.db.QueryRow(query, email)
+
+	var user userEntity.UserEntity
+	err := row.Scan(&user.Id, &user.Email, &user.Matricula, &user.RoleID, &user.PasswordHash)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("usuario no encontrado")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener usuario: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (repo *UserRepository) Register(user *userEntity.UserEntity, plainPassword string) error {
+	parts := strings.Split(user.Email, "@")
+	if len(parts) != 2 || parts[1] != "ids.upchiapas.edu.mx" {
+		return fmt.Errorf("correo no válido: solo se aceptan cuentas institucionales")
+	}
+
+	if matched, _ := regexp.MatchString(`^\d{6}$`, parts[0]); matched {
+		user.RoleID = 1
+	} else {
+		user.RoleID = 2
+	}
+
+	hash, err := auth.HashPassword(plainPassword)
+	if err != nil {
+		return fmt.Errorf("error al generar el hash: %w", err)
+	}
+
+	user.PasswordHash = hash
+
+	query := `INSERT INTO users (email, matricula, role_id, password_hash) VALUES ($1, $2, $3, $4) RETURNING id`
+	err = repo.db.QueryRow(query, user.Email, user.Matricula, user.RoleID, user.PasswordHash).Scan(&user.Id)
+	if err != nil {
+		return fmt.Errorf("error al insertar usuario: %w", err)
+	}
+
+	return nil
 }

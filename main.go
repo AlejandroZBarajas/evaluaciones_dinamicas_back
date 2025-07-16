@@ -46,6 +46,8 @@ func main() {
 	getUserById := userApplication.NewGetUserById(userRepo)
 	getUserByMatricula := userApplication.NewGetUserByMatricula(userRepo)
 	getUsersByRole := userApplication.NewGetUsersByRole(userRepo)
+	loginUser := userApplication.NewLoginUser(userRepo)
+	registerUser := userApplication.NewRegisterUser(userRepo)
 
 	userController := userInfrastructure.NewUserController(
 		createUser,
@@ -54,6 +56,8 @@ func main() {
 		getUserById,
 		getUserByMatricula,
 		getUsersByRole,
+		loginUser,
+		registerUser,
 	)
 
 	categoryRepo := categoryInfrastructure.NewCategoryRepository(db)
