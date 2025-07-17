@@ -17,6 +17,8 @@ type UserController struct {
 	GetByIdUseCase        *userApplication.GetUserById
 	GetByMatriculaUseCase *userApplication.GetUserByMatricula
 	GetByRoleUseCase      *userApplication.GetUsersByRole
+	LoginUseCase          *userApplication.LoginUser
+	RegisterUseCase       *userApplication.RegisterUser
 }
 
 func NewUserController(
@@ -26,6 +28,9 @@ func NewUserController(
 	getUserById *userApplication.GetUserById,
 	getUserByMatricula *userApplication.GetUserByMatricula,
 	getUsersByRole *userApplication.GetUsersByRole,
+	loginUser *userApplication.LoginUser,
+	registerUser *userApplication.RegisterUser,
+
 ) *UserController {
 	return &UserController{
 		CreateUseCase:         createUser,
@@ -34,7 +39,39 @@ func NewUserController(
 		GetByIdUseCase:        getUserById,
 		GetByMatriculaUseCase: getUserByMatricula,
 		GetByRoleUseCase:      getUsersByRole,
+		LoginUseCase:          loginUser,
+		RegisterUseCase:       registerUser,
 	}
+}
+
+func (uc *UserController) HandleRegister(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Email string `json:"email"`
+		/* Matricula string `json:"matricula"` */
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "cuerpo inválido", http.StatusBadRequest)
+		return
+	}
+
+	user := &userEntity.UserEntity{
+		Email: body.Email,
+		/* Matricula: body.Matricula, */
+	}
+
+	err := uc.RegisterUseCase.Run(user, body.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "usuario registrado correctamente",
+		"user_id": user.Id,
+	})
 }
 
 func (uc *UserController) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +80,7 @@ func (uc *UserController) HandleCreateUser(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	createdUser, err := uc.CreateUseCase.Run(user.Email, user.Matricula)
+	createdUser, err := uc.CreateUseCase.Run(user.Email /* user.Matricula */)
 	if err != nil {
 		log.Printf("❌ Error al crear usuario: %v\n", err)
 		http.Error(w, "Could not create user (infra)", http.StatusInternalServerError)
@@ -135,4 +172,22 @@ func (uc *UserController) HandleGetUsersByRole(w http.ResponseWriter, r *http.Re
 
 	json.NewEncoder(w).Encode(users)
 
+}
+func (uc *UserController) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "cuerpo inválido", http.StatusBadRequest)
+		return
+	}
+
+	out, err := uc.LoginUseCase.Run(body.Email, body.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(out)
 }

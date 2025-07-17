@@ -3,6 +3,7 @@ package examInfrastructure
 import (
 	"database/sql"
 	examEntity "evaluaciones/src/exam/domain/entity"
+	"fmt"
 )
 
 type ExamRepository struct {
@@ -18,24 +19,25 @@ func (repo *ExamRepository) CreateExam(exam *examEntity.ExamEntity) error {
 	return repo.db.QueryRow(query, exam.Name, exam.TotalQuestions, exam.TeacherID, exam.CategoryId).Scan(&exam.ID)
 }
 
-func (repo *ExamRepository) GetAllByTeacherID(teacherID int32) (*[]examEntity.ExamEntity, error) {
-	query := "SELECT id, name, total_questions, teacher_id, category_id FROM exams WHERE teacher_id = $1"
+func (repo *ExamRepository) GetAllByTeacherID(teacherID int32) ([]examEntity.ExamEntity, error) {
+	query := "SELECT id, name, total_questions,  category_id FROM exams WHERE teacher_id = $1"
 	rows, err := repo.db.Query(query, teacherID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var exams []examEntity.ExamEntity
+	exams := make([]examEntity.ExamEntity, 0)
+
 	for rows.Next() {
 		var exam examEntity.ExamEntity
-		if err := rows.Scan(&exam.ID, &exam.Name, &exam.TotalQuestions, &exam.TeacherID, &exam.CategoryId); err != nil {
+		if err := rows.Scan(&exam.ID, &exam.Name, &exam.TotalQuestions, &exam.CategoryId); err != nil {
 			return nil, err
 		}
 		exams = append(exams, exam)
 	}
 
-	return &exams, nil
+	return exams, nil
 }
 
 func (repo *ExamRepository) GetExamByID(examID int32) (examEntity.ExamEntity, error) {
@@ -59,4 +61,30 @@ func (repo *ExamRepository) DeleteExam(examID int32) error {
 	query := "DELETE FROM exams WHERE id = $1"
 	_, err := repo.db.Exec(query, examID)
 	return err
+}
+
+func (r *ExamRepository) GetbyTeacherAndCategory(teacherID int32, categoryID int32) ([]examEntity.ExamEntity, error) {
+	query := "SELECT id, name, total_questions FROM exams WHERE teacher_id = $1 AND category_id = $2"
+	rows, err := r.db.Query(query, teacherID, categoryID)
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener exámenes: %w", err)
+	}
+	defer rows.Close()
+
+	exams := make([]examEntity.ExamEntity, 0)
+
+	for rows.Next() {
+		var exam examEntity.ExamEntity
+		err := rows.Scan(&exam.ID, &exam.Name, &exam.TotalQuestions)
+		if err != nil {
+			return nil, fmt.Errorf("error al escanear examen: %w", err)
+		}
+		exams = append(exams, exam)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error al recorrer resultados: %w", err)
+	}
+
+	return exams, nil
 }

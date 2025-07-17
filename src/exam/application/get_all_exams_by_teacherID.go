@@ -13,6 +13,6 @@ func NewGetAllExamsByTeacherID(repo examDomain.ExamInterface) *GetAllExamsByTeac
 	return &GetAllExamsByTeacherID{repo: repo}
 }
 
-func (uc *GetAllExamsByTeacherID) Run(teacherID int32) (*[]examEntity.ExamEntity, error) {
+func (uc *GetAllExamsByTeacherID) Run(teacherID int32) ([]examEntity.ExamEntity, error) {
 	return uc.repo.GetAllByTeacherID(teacherID)
 }

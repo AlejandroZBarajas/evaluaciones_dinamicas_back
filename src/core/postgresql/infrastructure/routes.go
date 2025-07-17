@@ -24,6 +24,9 @@ func RegisterUserRoutes(mux *http.ServeMux, controller *userInfrastructure.UserC
 		}
 	})
 
+	mux.HandleFunc("/auth/register", controller.HandleRegister)
+	mux.HandleFunc("/auth/login", controller.HandleLogin)
+
 	mux.HandleFunc("/users/id/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			controller.HandleGetUserById(w, r)
@@ -130,6 +133,14 @@ func RegisterExamRoutes(mux *http.ServeMux, controller *examInfrastructure.ExamC
 	mux.HandleFunc("/exams/teacher", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			controller.HandleGetAllByTeacher(w, r)
+		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/exams/teachercategory", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			controller.HandleTeacherAndCategory(w, r)
 		} else {
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}

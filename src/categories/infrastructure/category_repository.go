@@ -35,7 +35,7 @@ func (repo *CategoryRepository) GetCategoryByID(id int32) (*categoryEntity.Categ
 }
 
 func (repo *CategoryRepository) GetAllCategoriesByTeacherID(teacherID int32) ([]*categoryEntity.CategoryEntity, error) {
-	query := "SELECT id, name, teacher_id FROM categories WHERE teacher_id = $1"
+	query := "SELECT id, name FROM categories WHERE teacher_id = $1"
 	rows, err := repo.db.Query(query, teacherID)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (repo *CategoryRepository) GetAllCategoriesByTeacherID(teacherID int32) ([]
 	var categories []*categoryEntity.CategoryEntity
 	for rows.Next() {
 		var category categoryEntity.CategoryEntity
-		err := rows.Scan(&category.ID, &category.Name, &category.TeacherID)
+		err := rows.Scan(&category.ID, &category.Name)
 		if err != nil {
 			return nil, err
 		}

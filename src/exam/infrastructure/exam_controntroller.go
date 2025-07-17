@@ -2,6 +2,7 @@ package examInfrastructure
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	//stronv"
@@ -11,11 +12,12 @@ import (
 )
 
 type ExamController struct {
-	CreateUseCase   *examApplication.CreateExam
-	GetAllByTeacher *examApplication.GetAllExamsByTeacherID
-	GetByID         *examApplication.GetExamByID
-	UpdateUseCase   *examApplication.UpdateExam
-	DeleteUseCase   *examApplication.DeleteExam
+	CreateUseCase           *examApplication.CreateExam
+	GetAllByTeacher         *examApplication.GetAllExamsByTeacherID
+	GetByID                 *examApplication.GetExamByID
+	UpdateUseCase           *examApplication.UpdateExam
+	DeleteUseCase           *examApplication.DeleteExam
+	GetbyTeacherAndCategory *examApplication.GetbyTeacherAndCategory
 }
 
 func NewExamController(
@@ -24,13 +26,15 @@ func NewExamController(
 	getByID *examApplication.GetExamByID,
 	update *examApplication.UpdateExam,
 	delete *examApplication.DeleteExam,
+	teacherAndCategory *examApplication.GetbyTeacherAndCategory,
 ) *ExamController {
 	return &ExamController{
-		CreateUseCase:   create,
-		GetAllByTeacher: getAllByTeacher,
-		GetByID:         getByID,
-		UpdateUseCase:   update,
-		DeleteUseCase:   delete,
+		CreateUseCase:           create,
+		GetAllByTeacher:         getAllByTeacher,
+		GetByID:                 getByID,
+		UpdateUseCase:           update,
+		DeleteUseCase:           delete,
+		GetbyTeacherAndCategory: teacherAndCategory,
 	}
 }
 
@@ -127,4 +131,25 @@ func (c *ExamController) HandleDeleteExam(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (c *ExamController) HandleTeacherAndCategory(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		TeacherID  int32 `json:"teacher_id"`
+		CategoryID int32 `json:"category_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "❌ Error al decodificar el cuerpo de la solicitud", http.StatusBadRequest)
+		return
+	}
+
+	exams, err := c.GetbyTeacherAndCategory.Run(req.TeacherID, req.CategoryID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("❌ Error al obtener exámenes: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(exams)
 }
