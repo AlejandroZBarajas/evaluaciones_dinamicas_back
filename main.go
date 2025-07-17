@@ -83,6 +83,7 @@ func main() {
 	getExamByID := examApplication.NewGetExamByID(examRepo)
 	updateExam := examApplication.NewUpdateExam(examRepo)
 	deleteExam := examApplication.NewDeleteExam(examRepo)
+	teacherAndCategory := examApplication.NewGetbyTeacherAndCategory(examRepo)
 
 	examController := examInfrastructure.NewExamController(
 		createExam,
@@ -90,6 +91,7 @@ func main() {
 		getExamByID,
 		updateExam,
 		deleteExam,
+		teacherAndCategory,
 	)
 
 	questionRepo := questionInfrastructure.NewQuestionRepository(db)

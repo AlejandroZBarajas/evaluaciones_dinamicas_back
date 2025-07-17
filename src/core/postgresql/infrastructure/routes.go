@@ -137,6 +137,14 @@ func RegisterExamRoutes(mux *http.ServeMux, controller *examInfrastructure.ExamC
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}
 	})
+
+	mux.HandleFunc("/exams/teachercategory", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			controller.HandleTeacherAndCategory(w, r)
+		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
 }
 
 func RegisterStudentExamRoutes(mux *http.ServeMux, controller *studentExamInfrastructure.StudentExamController) {
