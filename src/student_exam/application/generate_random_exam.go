@@ -14,6 +14,6 @@ func NewGenerateRandomExam(repo studentExamDomain.StudentExamInterface) *Generat
 	return &GenerateRandomExam{repo}
 }
 
-func (g *GenerateRandomExam) Run(random *studentExamEntity.RandomExamInput) ([]*questionEntity.QuestionEntity, error) {
+func (g *GenerateRandomExam) Run(random *studentExamEntity.RandomExamInput) ([]questionEntity.QuestionEntity, error) {
 	return g.repo.GenerateRandomExam(random)
 }

@@ -63,7 +63,7 @@ func (qr *QuestionRepository) DeleteQuestion(id int32) error {
 	return err
 }
 
-func (qr *QuestionRepository) GetAllQuestionsByExam(examID int32) ([]*questionEntity.QuestionEntity, error) {
+func (qr *QuestionRepository) GetAllQuestionsByExam(examID int32) ([]questionEntity.QuestionEntity, error) {
 	query := `SELECT id, question_data, category_id, exam_id FROM questions WHERE exam_id = $1`
 	rows, err := qr.db.Query(query, examID)
 	if err != nil {
@@ -71,7 +71,7 @@ func (qr *QuestionRepository) GetAllQuestionsByExam(examID int32) ([]*questionEn
 	}
 	defer rows.Close()
 
-	var questions []*questionEntity.QuestionEntity
+	var questions []questionEntity.QuestionEntity
 	for rows.Next() {
 		var q questionEntity.QuestionEntity
 		var data []byte
@@ -81,7 +81,7 @@ func (qr *QuestionRepository) GetAllQuestionsByExam(examID int32) ([]*questionEn
 		if err := json.Unmarshal(data, &q.QuestionData); err != nil {
 			return nil, err
 		}
-		questions = append(questions, &q)
+		questions = append(questions, q)
 	}
 	return questions, nil
 }

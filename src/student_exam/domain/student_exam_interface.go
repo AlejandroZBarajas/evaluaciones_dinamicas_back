@@ -8,7 +8,7 @@ import (
 type StudentExamInterface interface {
 	CreateStudentExam(studentExam *studentExamEntity.StudentExamEntity) error
 
-	GetAllByExamID(examID int32) ([]*studentExamEntity.StudentExamEntity, error)
+	GetAllByExamID(examID int32) ([]studentExamEntity.StudentExamEntity, error)
 
 	GetStudentExamByID(studentExamID int32) (*studentExamEntity.StudentExamEntity, error)
 
@@ -16,5 +16,5 @@ type StudentExamInterface interface {
 
 	EvaluateStudentExam(submission *studentExamEntity.ExamSubmissionInput) (*studentExamEntity.StudentExamResult, error)
 
-	GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]*questionEntity.QuestionEntity, error)
+	GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]questionEntity.QuestionEntity, error)
 }

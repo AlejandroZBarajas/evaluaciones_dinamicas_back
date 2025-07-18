@@ -46,7 +46,7 @@ func (r *StudentExamRepository) CreateStudentExam(studentExam *studentExamEntity
 	return nil
 }
 
-func (r *StudentExamRepository) GetAllByExamID(examID int32) ([]*studentExamEntity.StudentExamEntity, error) {
+func (r *StudentExamRepository) GetAllByExamID(examID int32) ([]studentExamEntity.StudentExamEntity, error) {
 	query := `
 		SELECT id, exam_id, student_id, total_questions, correct_answers, responses, submitted_at
 		FROM student_exams
@@ -59,7 +59,7 @@ func (r *StudentExamRepository) GetAllByExamID(examID int32) ([]*studentExamEnti
 	}
 	defer rows.Close()
 
-	var result []*studentExamEntity.StudentExamEntity
+	var result []studentExamEntity.StudentExamEntity
 	for rows.Next() {
 		var e studentExamEntity.StudentExamEntity
 		var jsonStr []byte
@@ -69,7 +69,7 @@ func (r *StudentExamRepository) GetAllByExamID(examID int32) ([]*studentExamEnti
 		}
 
 		json.Unmarshal(jsonStr, &e.Responses)
-		result = append(result, &e)
+		result = append(result, e)
 	}
 
 	return result, nil

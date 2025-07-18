@@ -13,6 +13,6 @@ func NewGetAllQuestionsByExam(repo questionDomain.QuestionInterface) *GetAllQues
 	return &GetAllQuestionsByExam{repo: repo}
 }
 
-func (ga *GetAllQuestionsByExam) Run(examID int32) ([]*questionEntity.QuestionEntity, error) {
+func (ga *GetAllQuestionsByExam) Run(examID int32) ([]questionEntity.QuestionEntity, error) {
 	return ga.repo.GetAllQuestionsByExam(examID)
 }

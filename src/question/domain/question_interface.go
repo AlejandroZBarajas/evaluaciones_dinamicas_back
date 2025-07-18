@@ -11,7 +11,7 @@ type QuestionInterface interface {
 
 	DeleteQuestion(questionID int32) error
 
-	GetAllQuestionsByExam(examid int32) ([]*questionEntity.QuestionEntity, error)
+	GetAllQuestionsByExam(examid int32) ([]questionEntity.QuestionEntity, error)
 
 	GetAllQuestionsByCategory(categoryID int32) ([]*questionEntity.QuestionEntity, error)
 }

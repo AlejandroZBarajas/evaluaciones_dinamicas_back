@@ -13,6 +13,6 @@ func NewGetAllByExamID(repo studentExamDomain.StudentExamInterface) *GetAllByExa
 	return &GetAllByExamID{repo: repo}
 }
 
-func (g *GetAllByExamID) Run(examID int32) ([]*studentExamEntity.StudentExamEntity, error) {
+func (g *GetAllByExamID) Run(examID int32) ([]studentExamEntity.StudentExamEntity, error) {
 	return g.repo.GetAllByExamID(examID)
 }

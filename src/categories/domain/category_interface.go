@@ -8,5 +8,5 @@ type CategoryInterface interface {
 	DeleteCategory(categoryID int32) error
 	UpdateCategory(categoryID int32, category *categoryEntity.CategoryEntity) error
 
-	GetAllCategoriesByTeacherID(teacherID int32) ([]*categoryEntity.CategoryEntity, error)
+	GetAllCategoriesByTeacherID(teacherID int32) ([]categoryEntity.CategoryEntity, error)
 }

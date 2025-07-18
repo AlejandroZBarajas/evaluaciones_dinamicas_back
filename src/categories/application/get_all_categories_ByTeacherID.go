@@ -13,6 +13,6 @@ func NewGetAllCategoriesByTeacherID(repo categoryDomain.CategoryInterface) *GetA
 	return &GetAllCategoriesByTeacherID{repo: repo}
 }
 
-func (gac *GetAllCategoriesByTeacherID) Run(teacherID int32) ([]*categoryEntity.CategoryEntity, error) {
+func (gac *GetAllCategoriesByTeacherID) Run(teacherID int32) ([]categoryEntity.CategoryEntity, error) {
 	return gac.repo.GetAllCategoriesByTeacherID(teacherID)
 }
