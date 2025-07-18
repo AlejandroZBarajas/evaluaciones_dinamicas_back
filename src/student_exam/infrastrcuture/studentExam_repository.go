@@ -170,7 +170,7 @@ func (r *StudentExamRepository) EvaluateStudentExam(submission *studentExamEntit
 	return &entity, nil
 }
 
-func (r *StudentExamRepository) GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]*questionEntity.QuestionEntity, error) {
+func (r *StudentExamRepository) GenerateRandomExam(input *studentExamEntity.RandomExamInput) ([]questionEntity.QuestionEntity, error) {
 
 	var totalQuestions int32
 	err := r.db.QueryRow("SELECT total_questions FROM exams WHERE id = ?", input.ExamID).Scan(&totalQuestions)
@@ -204,6 +204,10 @@ func (r *StudentExamRepository) GenerateRandomExam(input *studentExamEntity.Rand
 		allQuestions = append(allQuestions, &q)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error durante la iteración de preguntas: %w", err)
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(allQuestions), func(i, j int) {
 		allQuestions[i], allQuestions[j] = allQuestions[j], allQuestions[i]
@@ -212,10 +216,15 @@ func (r *StudentExamRepository) GenerateRandomExam(input *studentExamEntity.Rand
 	if int32(len(allQuestions)) < totalQuestions {
 		return nil, fmt.Errorf("no hay suficientes preguntas para generar el examen")
 	}
-	selected := allQuestions[:totalQuestions]
+	selectedPtrs := allQuestions[:totalQuestions]
 
-	// guardar la selección en una tabla intermedia
-	// la relación entre student_exam_id y las preguntas seleccionadas
+	// Convertir []*QuestionEntity a []QuestionEntity
+	selected := make([]questionEntity.QuestionEntity, len(selectedPtrs))
+	for i, qPtr := range selectedPtrs {
+		selected[i] = *qPtr
+	}
+
+	// Aquí puedes insertar la relación student_exam_id - pregunta en una tabla intermedia si deseas
 
 	return selected, nil
 }
