@@ -52,6 +52,9 @@ func (repo *CategoryRepository) GetAllCategoriesByTeacherID(teacherID int32) ([]
 		categories = append(categories, category)
 	}
 
+	if categories == nil {
+		categories = make([]categoryEntity.CategoryEntity, 0)
+	}
 	return categories, nil
 }
 
