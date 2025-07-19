@@ -25,7 +25,7 @@ func (r *ResultsRepository) CreateResult(result *resultsEntity.ResultsEntity) er
 	return r.db.QueryRow(query, result.StundetExamID, resultJSON, result.CreatedAt).Scan(&result.ID)
 }
 
-func (r *ResultsRepository) GetAllResultsByExam(examID int32) ([]*resultsEntity.ResultsEntity, error) {
+func (r *ResultsRepository) GetAllResultsByExam(examID int32) ([]resultsEntity.ResultsEntity, error) {
 	query := `
 		SELECT r.id, r.student_exam_id, r.result, r.created_at
 		FROM results r
@@ -39,7 +39,7 @@ func (r *ResultsRepository) GetAllResultsByExam(examID int32) ([]*resultsEntity.
 	}
 	defer rows.Close()
 
-	var results []*resultsEntity.ResultsEntity
+	var results []resultsEntity.ResultsEntity
 
 	for rows.Next() {
 		var res resultsEntity.ResultsEntity
@@ -49,7 +49,11 @@ func (r *ResultsRepository) GetAllResultsByExam(examID int32) ([]*resultsEntity.
 		}
 
 		json.Unmarshal(resultJSON, &res.Result)
-		results = append(results, &res)
+		results = append(results, res)
+	}
+
+	if results == nil {
+		results = make([]resultsEntity.ResultsEntity, 0)
 	}
 
 	return results, nil

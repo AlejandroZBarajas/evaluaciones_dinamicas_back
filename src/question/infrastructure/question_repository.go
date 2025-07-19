@@ -83,6 +83,10 @@ func (qr *QuestionRepository) GetAllQuestionsByExam(examID int32) ([]questionEnt
 		}
 		questions = append(questions, q)
 	}
+
+	if questions == nil {
+		questions = make([]questionEntity.QuestionEntity, 0)
+	}
 	return questions, nil
 }
 

@@ -13,6 +13,6 @@ func NewGetAllResultsByExam(repo resultsDomain.ResultsInterface) *GetAllResultsB
 	return &GetAllResultsByExam{repo: repo}
 }
 
-func (g *GetAllResultsByExam) Run(examID int32) ([]*resultsEntity.ResultsEntity, error) {
+func (g *GetAllResultsByExam) Run(examID int32) ([]resultsEntity.ResultsEntity, error) {
 	return g.repo.GetAllResultsByExam(examID)
 }
